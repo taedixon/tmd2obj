@@ -23,4 +23,8 @@ public class Primitive {
     public String getFace() {
         return packet.getFace();
     }
+
+    public Material getMaterial() {
+        return packet.getMaterial();
+    }
 }

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Calendar;
 import java.util.LinkedList;
 
 /**
@@ -28,12 +29,22 @@ public class TmdFile {
     public void convert(File directory, String name) throws IOException {
         int modelCount = 1;
         for (Model m : objList) {
-            File outfile = new File(directory + "/" + name + "." + modelCount++ + ".obj");
+            String objname = name + "." + modelCount++;
+            File outfile = new File(directory + "/" + objname + ".obj");
             BufferedWriter writer = new BufferedWriter(new FileWriter(outfile));
+            writer.write("# Converted with TMD2OBJ by Noxid\n");
+            writer.write("# Converted on:" + Calendar.getInstance().getTime() + "\n");
+            writer.write("mtllib " + objname + ".mtl\n");
+            writer.write("o " + objname + "\n");
             m.writeVerts(writer);
             m.writeNormals(writer);
-            m.writeFaces(writer);
+            m.writeFaces(writer, objname);
             writer.close();
+
+            File mtlFile = new File(directory + "/" + objname + ".mtl");
+            BufferedWriter mtlWriter = new BufferedWriter(new FileWriter(mtlFile));
+            m.writeMaterials(mtlWriter, objname);
+            mtlWriter.close();
         }
     }
 

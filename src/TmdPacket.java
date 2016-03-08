@@ -39,6 +39,8 @@ public abstract class TmdPacket {
                 vert3+1, normal1+1);
     }
 
+    public abstract Material getMaterial();
+
     /**
      * Flat Shading Flat Pigment
      */
@@ -55,6 +57,11 @@ public abstract class TmdPacket {
             vert1 = data.getShort();
             vert2 = data.getShort();
             vert3 = data.getShort();
+        }
+
+        @Override
+        public Material getMaterial() {
+            return new Material(red, green, blue, false);
         }
     }
 
@@ -78,12 +85,16 @@ public abstract class TmdPacket {
             normal3 = data.getShort();
             vert3 = data.getShort();
         }
+        @Override
+        public Material getMaterial() {
+            return new Material(red, green, blue, false);
+        }
     }
 
     /**
      * Flat Shading Gradient Pigment
      */
-    class FGPacket extends TmdPacket {
+    class FGPacket {
         byte red1, green1, blue1;
         byte red2, green2, blue2;
         byte red3, green3, blue3;
@@ -95,7 +106,7 @@ public abstract class TmdPacket {
     /**
      * Gourad Shading Gradient Pigment
      */
-    class GGPacket extends TmdPacket {
+    class GGPacket {
         byte mode; //0x30
         byte red1, green1, blue1;
         byte red2, green2, blue2;
@@ -129,6 +140,10 @@ public abstract class TmdPacket {
             vert2 = data.getShort();
             vert3 = data.getShort();
         }
+        @Override
+        public Material getMaterial() {
+            return new Material(CBA, TSB);
+        }
     }
 
     /**
@@ -159,6 +174,11 @@ public abstract class TmdPacket {
             normal3 = data.getShort();
             vert3 = data.getShort();
         }
+
+        @Override
+        public Material getMaterial() {
+            return new Material(CBA, TSB);
+        }
     }
 
     /**
@@ -178,6 +198,10 @@ public abstract class TmdPacket {
             vert3 = data.getShort();
             data.getShort();
         }
+        @Override
+        public Material getMaterial() {
+            return new Material(red, green, blue, false);
+        }
     }
     /**
      * Translucent Flat Shaded Flat Coloured
@@ -195,6 +219,10 @@ public abstract class TmdPacket {
             vert1 = data.getShort();
             vert2 = data.getShort();
             vert3 = data.getShort();
+        }
+        @Override
+        public Material getMaterial() {
+            return new Material(red, green, blue, true);
         }
     }
 
@@ -218,6 +246,10 @@ public abstract class TmdPacket {
             vert2 = data.getShort();
             normal3 = data.getShort();
             vert3 = data.getShort();
+        }
+        @Override
+        public Material getMaterial() {
+            return new Material(red, green, blue, true);
         }
     }
 }

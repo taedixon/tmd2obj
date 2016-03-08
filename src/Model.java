@@ -2,14 +2,15 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Noxid on 08-Mar-16.
  */
 public class Model {
-    private ArrayList<Vec3> verts = new ArrayList<Vec3>();
-    private ArrayList<Vec3> normals = new ArrayList<Vec3>();
-    private ArrayList<Primitive> primitives = new ArrayList<Primitive>();
+    private ArrayList<Vec3> verts = new ArrayList<>();
+    private ArrayList<Vec3> normals = new ArrayList<>();
+    private HashMap<Material, ArrayList<Primitive>> primitives = new HashMap<>();
 
     int flags;
 
@@ -51,7 +52,12 @@ public class Model {
         }
         data.position(primitiveAddress);
         for (int i = 0; i < nPrimitive; i++) {
-            primitives.add(new Primitive(data));
+            Primitive p = new Primitive(data);
+            Material m = p.getMaterial();
+            if (!primitives.containsKey(m)) {
+                primitives.put(m,new ArrayList<>());
+            }
+            primitives.get(m).add(p);
         }
     }
 
@@ -73,9 +79,24 @@ public class Model {
         }
     }
 
-    public void writeFaces(Writer writer) throws IOException {
-        for (Primitive p : primitives) {
-            writer.write(p.getFace() + "\n");
+    public void writeFaces(Writer writer, String mtlbasename) throws IOException {
+        int mtlcount = 0;
+        writer.write("s off\n");
+        for (Material m : primitives.keySet()) {
+            writer.write("usemtl " + mtlbasename + "m" + mtlcount++ + "\n");
+            for (Primitive p : primitives.get(m)) {
+                writer.write(p.getFace() + "\n");
+            }
+
+        }
+    }
+
+    public void writeMaterials(Writer writer, String mtlbasename) throws IOException{
+        int mtlcount = 0;
+        for (Material m : primitives.keySet()) {
+            writer.write("newmtl " + mtlbasename + "m" + mtlcount++ + "\n");
+            writer.write(m.toString());
+
         }
     }
 }
