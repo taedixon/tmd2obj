@@ -40,8 +40,7 @@ public class Converter {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (Exception e) {
-            System.out.println("Error in " + current);
-            e.printStackTrace();
+            System.out.println("./models folder not found ! Make sure to run this program in the same directory as the models one.");
         }
     }
 }
