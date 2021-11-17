@@ -20,5 +20,15 @@ In a terminal :
 
 # Usage
 
-Running the application will automatically search for any files in the `models` directory with a `.tmd` file extension, and
+You can use any number of tmd files as arguments, and they will be converted to obj. 
+
+```bash
+java -jar tmd2obj.jar file1.tmd file2.tmd
+```
+
+You can also use a wildcard asterisk (*); e.g : `java -jar tmd2obj.jar some/folder/*.tmd`  
+
+The resulting file(s) will be placed in the same folder as the original.  
+
+If no argument is provided, running the application will automatically search for any files in the `models` directory with a `.tmd` file extension, and
 will place converted `*.obj` and `*.mtl` files in the same directory.
