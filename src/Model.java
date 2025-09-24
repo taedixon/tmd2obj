@@ -41,16 +41,19 @@ public class Model {
         }
 
         data.position(vertAddress);
+        System.out.printf("Begin vertex data 0x%X\n", vertAddress);
         for (int i = 0; i < nVert; i++) {
             verts.add(new Vec3(data.getShort(), data.getShort(), data.getShort()));
             data.getShort(); //pad
         }
         data.position(normalAddress);
+        System.out.printf("Begin normal data 0x%X\n", normalAddress);
         for (int i = 0; i < nNorm; i++) {
             normals.add(new Vec3(data.getShort(), data.getShort(), data.getShort()));
             data.getShort(); //pad
         }
         data.position(primitiveAddress);
+        System.out.printf("Begin face data 0x%X\n", primitiveAddress);
         for (int i = 0; i < nPrimitive; i++) {
             Primitive p = new Primitive(data);
             Material m = p.getMaterial();
@@ -59,6 +62,7 @@ public class Model {
             }
             primitives.get(m).add(p);
         }
+        System.out.printf("Finished reading object 0x%X\n", data.position());
     }
 
     public void writeVerts(Writer writer) throws IOException {
@@ -79,15 +83,28 @@ public class Model {
         }
     }
 
+    public void writeUVs(Writer writer) throws  IOException {
+        int vt_index = 1;
+        for (ArrayList<Primitive> plist : primitives.values()) {
+            for (Primitive p : plist) {
+                int num_coords = p.numTexcoords();
+                if (num_coords > 0) {
+                    p.vt_index = vt_index;
+                    writer.write(p.getTexcoords());
+                    vt_index += num_coords;
+                }
+            }
+        }
+    }
+
     public void writeFaces(Writer writer, String mtlbasename) throws IOException {
         int mtlcount = 0;
         writer.write("s off\n");
         for (Material m : primitives.keySet()) {
             writer.write("usemtl " + mtlbasename + "m" + mtlcount++ + "\n");
             for (Primitive p : primitives.get(m)) {
-                writer.write(p.getFace() + "\n");
+                writer.write(p.getFace());
             }
-
         }
     }
 

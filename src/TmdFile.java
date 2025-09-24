@@ -38,6 +38,7 @@ public class TmdFile {
             writer.write("o " + objname + "\n");
             m.writeVerts(writer);
             m.writeNormals(writer);
+            m.writeUVs(writer);
             m.writeFaces(writer, objname);
             writer.close();
 
