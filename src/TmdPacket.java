@@ -26,17 +26,29 @@ public abstract class TmdPacket {
             case 0x0032:
                 return new TGFPacket(data);
         }
-        System.err.println(String.format("Unrecognized flag: 0x%x (%d) @0x%X", flagmode, ilen, data.position()));
-        throw new InputMismatchException("Fucked Up format");
+        System.err.printf("Unrecognized flag: 0x%x (%d) @0x%X%n\n", flagmode, ilen, data.position());
+        throw new InputMismatchException("Bad format");
         //data.get(new byte[ilen*4]);
         //return null;
     }
 
-    public String getFace() {
-        return String.format("f %d//%d %d//%d %d//%d",
-                vert1+1, normal1+1,
-                vert2+1, normal1+1,
-                vert3+1, normal1+1);
+    public String getFace(int vt_index) {
+        if (vt_index > 0) {
+            return String.format("f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+                    vert1 + 1, vt_index,     normal1 + 1,
+                    vert2 + 1, vt_index + 1, normal1 + 1,
+                    vert3 + 1, vt_index + 2, normal1 + 1);
+        } else {
+            return String.format("f %d//%d %d//%d %d//%d\n",
+                    vert1 + 1, normal1 + 1,
+                    vert2 + 1, normal1 + 1,
+                    vert3 + 1, normal1 + 1);
+        }
+    }
+
+    // Array of texture coordinates for this face
+    public byte[] getTexcoords() {
+        return new byte[0];
     }
 
     public abstract Material getMaterial();
@@ -144,6 +156,11 @@ public abstract class TmdPacket {
         public Material getMaterial() {
             return new Material(CBA, TSB);
         }
+
+        @Override
+        public byte[] getTexcoords() {
+            return new byte[] {u1, v1, u2, v2, u3, v3};
+        }
     }
 
     /**
@@ -178,6 +195,11 @@ public abstract class TmdPacket {
         @Override
         public Material getMaterial() {
             return new Material(CBA, TSB);
+        }
+
+        @Override
+        public byte[] getTexcoords() {
+            return new byte[] {u1, v1, u2, v2, u3, v3};
         }
     }
 

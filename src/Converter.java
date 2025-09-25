@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.Objects;
 
 /**
  * Created by Noxid on 07-Mar-16.
@@ -20,15 +21,23 @@ public class Converter {
         dataBuf.flip();
         dataBuf.order(ByteOrder.LITTLE_ENDIAN);
 
-        TmdFile tmd = new TmdFile(dataBuf);
+        String extension = tmdfile.getName().substring(tmdfile.getName().lastIndexOf('.'));
+
+        TmdFile tmd;
+        // yea this is clunky
+        if (extension.toLowerCase().equals(".tzp")) {
+            tmd = new TzpFile(dataBuf);
+        } else {
+            tmd = new TmdFile(dataBuf);
+        }
         tmd.convert(new File(tmdfile.getParent()),
-                tmdfile.getName().replace(".tmd",""));
+                tmdfile.getName().replace(extension,""));
     }
 
 
     public static void main(String[] args) {
         Converter c = new Converter();
-        File current = null;
+        String current = null;
         try {
             if (args.length > 0){
                 for (String s: args) {
@@ -40,16 +49,14 @@ public class Converter {
                                             "If no argument is provided, the program will look for tmd files in the 'models' folder.");
                         break;
                     }
-                    if (s.toLowerCase().endsWith(".tmd")) {
-                        File f = new File(s);
-                        c.convert(f);
-                    }
-                } 
+                    File f = new File(s);
+                    c.convert(f);
+                }
             } else {
                 File rootdir = new File("./models");
-                for (File f : rootdir.listFiles()) {
-                    current = f;
-                    if (f.getName().toLowerCase().endsWith(".tmd")) {
+                for (File f : Objects.requireNonNull(rootdir.listFiles())) {
+                    current = f.getName().toLowerCase();
+                    if (current.endsWith(".tmd") || current.endsWith(".tzp")) {
                         c.convert(f);
                     }
                 }
