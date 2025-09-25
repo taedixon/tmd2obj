@@ -22,16 +22,35 @@ public class Model {
     int nPrimitive;
     int scale; //unused?
 
+    int filesize;
 
-    Model(ByteBuffer data, int flags) {
-        vertAddress = data.getInt() + 12; // add 12 to account for header
+    Model(ByteBuffer data, int flags, int headerOffset) {
+        vertAddress = data.getInt() + headerOffset; // add 12 to account for header
         nVert = data.getInt();
-        normalAddress = data.getInt() + 12;
+        normalAddress = data.getInt() + headerOffset;
         nNorm = data.getInt();
-        primitiveAddress = data.getInt() + 12;
+        primitiveAddress = data.getInt() + headerOffset;
         nPrimitive = data.getInt();
         scale = data.getInt(); //unused?
         this.flags = flags;
+    }
+
+    // for bubsy poses
+    public Model(Model other, ArrayList<Vec3> verts, ArrayList<Vec3> normals) {
+        this.verts = verts;
+        nVert = verts.size();
+        this.normals = normals;
+        nNorm = normals.size();
+        primitives = other.primitives;
+    }
+
+    private void applyDelta(ArrayList<Vec3> output,
+                            ArrayList<Vec3> points,
+                            ArrayList<Vec3> delta) {
+        for (int i = 0; i < points.size(); i++) {
+            // remembering that Java is copy-by-ref for all nonprimitive types
+            output.add(points.get(i).add(delta.get(i)));
+        }
     }
 
     void populate(ByteBuffer data) {
@@ -39,18 +58,21 @@ public class Model {
             System.err.println("Unrecognized flags: " + flags);
             return;
         }
+        filesize = 28; // header size
 
         data.position(vertAddress);
         System.out.printf("Begin vertex data 0x%X\n", vertAddress);
         for (int i = 0; i < nVert; i++) {
             verts.add(new Vec3(data.getShort(), data.getShort(), data.getShort()));
             data.getShort(); //pad
+            filesize += 8;
         }
         data.position(normalAddress);
         System.out.printf("Begin normal data 0x%X\n", normalAddress);
         for (int i = 0; i < nNorm; i++) {
             normals.add(new Vec3(data.getShort(), data.getShort(), data.getShort()));
             data.getShort(); //pad
+            filesize += 8;
         }
         data.position(primitiveAddress);
         System.out.printf("Begin face data 0x%X\n", primitiveAddress);
@@ -61,6 +83,7 @@ public class Model {
                 primitives.put(m,new ArrayList<>());
             }
             primitives.get(m).add(p);
+            filesize += p.filesize;
         }
         System.out.printf("Finished reading object 0x%X\n", data.position());
     }
@@ -78,8 +101,8 @@ public class Model {
         for (Vec3 v : normals) {
             writer.write(String.format("vn %f %f %f\n",
                     v.vx*-500f/Short.MAX_VALUE,
-                    v.vz*-500f/Short.MAX_VALUE,
-                    v.vy*-500f/Short.MAX_VALUE));
+                    v.vy*-500f/Short.MAX_VALUE,
+                    v.vz*-500f/Short.MAX_VALUE));
         }
     }
 

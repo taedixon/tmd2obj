@@ -4,14 +4,15 @@ import java.nio.ByteBuffer;
  * Created by Noxid on 08-Mar-16.
  */
 public class Primitive {
-    byte olen;
-    byte ilen;
+    byte olen; // output data block length (dwords)
+    byte ilen; // input data block length (dwords)
     byte flag;
     byte mode;
 
     TmdPacket packet;
     // what index are our texture coordinates in the obj
     int vt_index = -1;
+    int filesize; // how big is this primitive in the TMD file
 
     Primitive(ByteBuffer data) {
         olen = data.get();
@@ -20,6 +21,8 @@ public class Primitive {
         mode = data.get();
 
         packet = TmdPacket.build(data, flag, mode, ilen);
+
+        filesize = 4 + ilen*4;
     }
 
     public String getFace() {
